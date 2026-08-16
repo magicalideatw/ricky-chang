@@ -40,7 +40,16 @@ function loadTurnstileScript(onLoad: () => void) {
   const existingScript = document.getElementById(TURNSTILE_SCRIPT_ID);
 
   if (existingScript) {
-    window.onTurnstileLoad = onLoad;
+    if (window.turnstile) {
+      onLoad();
+      return;
+    }
+
+    const previousOnLoad = window.onTurnstileLoad;
+    window.onTurnstileLoad = () => {
+      previousOnLoad?.();
+      onLoad();
+    };
     return;
   }
 
@@ -78,12 +87,16 @@ export function TurnstileWidget({
         widgetIdRef.current = null;
       }
 
-      widgetIdRef.current = window.turnstile.render(containerRef.current, {
-        sitekey: siteKey,
-        callback: onSuccess,
-        "error-callback": onError,
-        "expired-callback": onExpire,
-        theme: "light",
+      requestAnimationFrame(() => {
+        if (cancelled || !containerRef.current || !window.turnstile) return;
+
+        widgetIdRef.current = window.turnstile.render(containerRef.current, {
+          sitekey: siteKey,
+          callback: onSuccess,
+          "error-callback": onError,
+          "expired-callback": onExpire,
+          theme: "light",
+        });
       });
     };
 
@@ -102,6 +115,10 @@ export function TurnstileWidget({
   if (!siteKey) return null;
 
   return (
-    <div ref={containerRef} className="relative z-0 max-w-full overflow-hidden [&_iframe]:max-w-full" style={{ minHeight: "65px" }} />
+    <div
+      ref={containerRef}
+      className="relative z-0 max-w-full overflow-visible [&_iframe]:max-w-full"
+      style={{ minHeight: "65px" }}
+    />
   );
 }

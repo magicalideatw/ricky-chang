@@ -4,7 +4,11 @@ import { useState } from "react";
 import { ContactModal } from "@/components/ui/ContactModal";
 import { ScrollReveal } from "@/components/ui/ScrollReveal";
 
-export function ContactSection() {
+type ContactSectionProps = {
+  turnstileSiteKey: string;
+};
+
+export function ContactSection({ turnstileSiteKey }: ContactSectionProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -45,6 +49,7 @@ export function ContactSection() {
       <ContactModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
+        turnstileSiteKey={turnstileSiteKey}
       />
     </>
   );

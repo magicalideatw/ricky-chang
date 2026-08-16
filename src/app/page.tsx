@@ -8,8 +8,10 @@ import { IdentitySection } from "@/components/sections/IdentitySection";
 import { InternationalExperienceSection } from "@/components/sections/InternationalExperienceSection";
 import { TheatreSection } from "@/components/sections/TheatreSection";
 import { ContactSection } from "@/components/sections/ContactSection";
+import { getTurnstileSiteKey } from "@/lib/turnstile-public-config";
 
 export default function Home() {
+  const turnstileSiteKey = getTurnstileSiteKey();
   return (
     <HeroOpeningProvider>
       <Navbar />
@@ -20,7 +22,7 @@ export default function Home() {
         <IdentitySection />
         <InternationalExperienceSection />
         <TheatreSection />
-        <ContactSection />
+        <ContactSection turnstileSiteKey={turnstileSiteKey} />
       </main>
       <Footer />
     </HeroOpeningProvider>

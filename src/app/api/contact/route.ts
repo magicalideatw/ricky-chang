@@ -153,7 +153,7 @@ function buildEmailText(payload: ContactFormPayload, subjectLabel: string): stri
     "",
     `姓名：${payload.name}`,
     `Email：${payload.email}`,
-    `主旨：${subjectLabel}`,
+    `合作類型：${subjectLabel}`,
     "",
     "訊息內容：",
     payload.message,
@@ -171,7 +171,7 @@ function buildEmailHtml(
       </h2>
       <p style="margin: 0 0 12px;"><strong>姓名</strong><br />${escapeHtml(payload.name)}</p>
       <p style="margin: 0 0 12px;"><strong>Email</strong><br />${escapeHtml(payload.email)}</p>
-      <p style="margin: 0 0 12px;"><strong>主旨</strong><br />${escapeHtml(subjectLabel)}</p>
+      <p style="margin: 0 0 12px;"><strong>合作類型</strong><br />${escapeHtml(subjectLabel)}</p>
       <p style="margin: 0 0 8px;"><strong>訊息內容</strong></p>
       <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(payload.message)}</p>
     </div>
@@ -223,7 +223,11 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      console.error("Resend API error:", error);
+      console.error("Resend API error:", {
+        name: error.name,
+        message: error.message,
+        statusCode: "statusCode" in error ? error.statusCode : undefined,
+      });
       return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
     }
 

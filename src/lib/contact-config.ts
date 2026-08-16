@@ -1,6 +1,6 @@
 export const contactConfig = {
   recipientEmail: "magicalideatw@gmail.com",
-  fromEmail: "網站聯絡表單 <onboarding@resend.dev>",
+  fromEmail: "Ricky Chang Website <contact@chengart.tw>",
   inquiryTypes: [
     { value: "performance", label: "演出邀約" },
     { value: "commercial", label: "商業／活動合作" },

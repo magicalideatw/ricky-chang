@@ -13,11 +13,10 @@ import { contactConfig } from "@/lib/contact-config";
 type ContactModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  turnstileSiteKey: string;
 };
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
-
-const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
 const initialFormState = {
   name: "",
@@ -36,7 +35,11 @@ const textareaClassName =
 const labelClassName =
   "mb-1.5 block text-[10px] font-medium tracking-[0.28em] text-foreground uppercase";
 
-export function ContactModal({ isOpen, onClose }: ContactModalProps) {
+export function ContactModal({
+  isOpen,
+  onClose,
+  turnstileSiteKey,
+}: ContactModalProps) {
   const titleId = useId();
   const [formState, setFormState] = useState(initialFormState);
   const [turnstileToken, setTurnstileToken] = useState("");
