@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" fill="none">
+  <rect width="1600" height="900" fill="#111111"/>
+  <rect x="400" y="100" width="800" height="600" fill="#1c1c1c"/>
+  <circle cx="800" cy="350" r="80" fill="#252525"/>
+  <rect x="650" y="450" width="300" height="250" fill="#202020"/>
+  <text x="800" y="820" text-anchor="middle" fill="#333333" font-family="system-ui, sans-serif" font-size="14" letter-spacing="4">FEATURED WORK PLACEHOLDER</text>
+</svg>

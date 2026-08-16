@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none">
+  <rect width="1920" height="1080" fill="#0a0a0a"/>
+  <rect x="640" y="200" width="640" height="680" fill="#1a1a1a"/>
+  <ellipse cx="960" cy="380" rx="120" ry="140" fill="#2a2a2a"/>
+  <rect x="820" y="540" width="280" height="340" fill="#222222"/>
+  <text x="960" y="980" text-anchor="middle" fill="#333333" font-family="system-ui, sans-serif" font-size="14" letter-spacing="4">HERO IMAGE PLACEHOLDER</text>
+</svg>
