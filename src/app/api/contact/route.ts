@@ -1,6 +1,17 @@
 import { Resend } from "resend";
 import { NextResponse } from "next/server";
-import { contactConfig, type ContactFormPayload } from "@/lib/contact-config";
+import {
+  contactConfig,
+  type ContactFormPayload,
+  type ContactRequestBody,
+} from "@/lib/contact-config";
+
+const GENERIC_ERROR = "訊息送出失敗，請稍後再試。";
+const TURNSTILE_ERROR = "安全驗證失敗，請重新嘗試。";
+
+type TurnstileVerifyResponse = {
+  success: boolean;
+};
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -21,16 +32,29 @@ function getInquiryTypeLabel(inquiryType: string): string {
   );
 }
 
-function validatePayload(body: unknown): ContactFormPayload | null {
+function getClientIp(request: Request): string | undefined {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+
+  if (forwardedFor) {
+    const firstIp = forwardedFor.split(",")[0]?.trim();
+    if (firstIp) return firstIp;
+  }
+
+  return request.headers.get("x-real-ip")?.trim() || undefined;
+}
+
+function validatePayload(body: unknown): ContactRequestBody | null {
   if (!body || typeof body !== "object") return null;
 
-  const { name, email, inquiryType, message } = body as Record<string, unknown>;
+  const record = body as Record<string, unknown>;
+  const { name, email, inquiryType, message, turnstileToken, website } = record;
 
   if (
     typeof name !== "string" ||
     typeof email !== "string" ||
     typeof inquiryType !== "string" ||
-    typeof message !== "string"
+    typeof message !== "string" ||
+    typeof turnstileToken !== "string"
   ) {
     return null;
   }
@@ -38,8 +62,25 @@ function validatePayload(body: unknown): ContactFormPayload | null {
   const trimmedName = name.trim();
   const trimmedEmail = email.trim();
   const trimmedMessage = message.trim();
+  const trimmedToken = turnstileToken.trim();
+  const honeypot =
+    typeof website === "string" ? website.trim() : "";
 
-  if (!trimmedName || !trimmedEmail || !inquiryType || !trimmedMessage) {
+  if (
+    !trimmedName ||
+    !trimmedEmail ||
+    !inquiryType ||
+    !trimmedMessage ||
+    !trimmedToken
+  ) {
+    return null;
+  }
+
+  if (
+    trimmedName.length > contactConfig.fieldLimits.name ||
+    trimmedEmail.length > contactConfig.fieldLimits.email ||
+    trimmedMessage.length > contactConfig.fieldLimits.message
+  ) {
     return null;
   }
 
@@ -56,16 +97,63 @@ function validatePayload(body: unknown): ContactFormPayload | null {
     email: trimmedEmail,
     inquiryType,
     message: trimmedMessage,
+    turnstileToken: trimmedToken,
+    website: honeypot,
   };
 }
 
-function buildEmailText(payload: ContactFormPayload, inquiryLabel: string): string {
+async function verifyTurnstileToken(
+  token: string,
+  remoteIp?: string
+): Promise<boolean> {
+  const secretKey = process.env.TURNSTILE_SECRET_KEY;
+
+  if (!secretKey) {
+    console.error("Turnstile secret key is not configured.");
+    return false;
+  }
+
+  const params = new URLSearchParams({
+    secret: secretKey,
+    response: token,
+  });
+
+  if (remoteIp) {
+    params.set("remoteip", remoteIp);
+  }
+
+  try {
+    const response = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Turnstile verification request failed.");
+      return false;
+    }
+
+    const result = (await response.json()) as TurnstileVerifyResponse;
+    return result.success === true;
+  } catch (error) {
+    console.error("Turnstile verification error:", error);
+    return false;
+  }
+}
+
+function buildEmailText(payload: ContactFormPayload, subjectLabel: string): string {
   return [
-    "新的聯絡詢問",
+    "網站聯絡表單通知",
     "",
     `姓名：${payload.name}`,
     `Email：${payload.email}`,
-    `合作類型：${inquiryLabel}`,
+    `主旨：${subjectLabel}`,
     "",
     "訊息內容：",
     payload.message,
@@ -74,16 +162,16 @@ function buildEmailText(payload: ContactFormPayload, inquiryLabel: string): stri
 
 function buildEmailHtml(
   payload: ContactFormPayload,
-  inquiryLabel: string
+  subjectLabel: string
 ): string {
   return `
     <div style="font-family: Arial, sans-serif; line-height: 1.7; color: #111111;">
       <h2 style="margin: 0 0 24px; font-size: 20px; font-weight: 400; letter-spacing: 0.04em;">
-        新的聯絡詢問
+        網站聯絡表單通知
       </h2>
       <p style="margin: 0 0 12px;"><strong>姓名</strong><br />${escapeHtml(payload.name)}</p>
       <p style="margin: 0 0 12px;"><strong>Email</strong><br />${escapeHtml(payload.email)}</p>
-      <p style="margin: 0 0 12px;"><strong>合作類型</strong><br />${escapeHtml(inquiryLabel)}</p>
+      <p style="margin: 0 0 12px;"><strong>主旨</strong><br />${escapeHtml(subjectLabel)}</p>
       <p style="margin: 0 0 8px;"><strong>訊息內容</strong></p>
       <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(payload.message)}</p>
     </div>
@@ -92,54 +180,56 @@ function buildEmailHtml(
 
 export async function POST(request: Request) {
   try {
-    const payload = validatePayload(await request.json());
+    const body = validatePayload(await request.json());
 
-    if (!payload) {
+    if (!body) {
       return NextResponse.json(
-        { error: "Please complete all required fields." },
+        { error: "請完整填寫所有必填欄位。" },
         { status: 400 }
       );
     }
 
-    const resendApiKey = process.env.RESEND_API_KEY;
-    const resendFromEmail = process.env.RESEND_FROM_EMAIL;
-
-    if (!resendApiKey || !resendFromEmail) {
-      return NextResponse.json(
-        {
-          error:
-            "Contact form email service is not configured yet. Please set RESEND_API_KEY and RESEND_FROM_EMAIL.",
-        },
-        { status: 503 }
-      );
+    if (body.website) {
+      return NextResponse.json({ error: GENERIC_ERROR }, { status: 400 });
     }
 
-    const inquiryLabel = getInquiryTypeLabel(payload.inquiryType);
+    const turnstileValid = await verifyTurnstileToken(
+      body.turnstileToken,
+      getClientIp(request)
+    );
+
+    if (!turnstileValid) {
+      return NextResponse.json({ error: TURNSTILE_ERROR }, { status: 400 });
+    }
+
+    const resendApiKey = process.env.RESEND_API_KEY;
+
+    if (!resendApiKey) {
+      console.error("Resend API key is not configured.");
+      return NextResponse.json({ error: GENERIC_ERROR }, { status: 503 });
+    }
+
+    const { turnstileToken: _token, website: _website, ...payload } = body;
+    const subjectLabel = getInquiryTypeLabel(payload.inquiryType);
     const resend = new Resend(resendApiKey);
 
     const { error } = await resend.emails.send({
-      from: resendFromEmail,
+      from: contactConfig.fromEmail,
       to: contactConfig.recipientEmail,
       replyTo: payload.email,
-      subject: `【Ricky Chang Website】新的聯絡詢問｜${inquiryLabel}`,
-      html: buildEmailHtml(payload, inquiryLabel),
-      text: buildEmailText(payload, inquiryLabel),
+      subject: `【網站聯絡表單】${subjectLabel}`,
+      html: buildEmailHtml(payload, subjectLabel),
+      text: buildEmailText(payload, subjectLabel),
     });
 
     if (error) {
       console.error("Resend API error:", error);
-      return NextResponse.json(
-        { error: "Unable to send your message. Please try again." },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Contact form error:", error);
-    return NextResponse.json(
-      { error: "Unable to send your message. Please try again." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 500 });
   }
 }
