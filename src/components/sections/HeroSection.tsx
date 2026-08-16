@@ -125,7 +125,7 @@ export function HeroSection() {
           className={`mx-auto flex w-full max-w-7xl flex-col justify-start px-6 pt-28 pb-14 sm:max-w-[88%] md:max-w-none md:justify-center md:px-10 md:py-0 md:pb-0 lg:px-16 xl:px-24 ${contentInteractive ? "" : "pointer-events-none"}`}
         >
           <div
-            className={`max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md ${isOpening ? "hero-opening-text" : ""} ${textReady ? "hero-opening-text-ready" : ""} ${openingSkipped ? "hero-opening-text-settled" : ""}`}
+            className={`hero-content max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md ${isOpening ? "hero-opening-text" : ""} ${textReady ? "hero-opening-text-ready" : ""} ${openingSkipped ? "hero-opening-text-settled" : ""}`}
           >
             <h1 className="hero-stagger-title font-display text-[2.25rem] font-light leading-[0.92] tracking-[0.05em] text-white sm:text-[2.85rem] md:text-[3.5rem] lg:text-[4.5rem] xl:text-[4.75rem]">
               <span className="block">RICKY</span>

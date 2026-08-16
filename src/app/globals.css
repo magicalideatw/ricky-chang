@@ -152,6 +152,12 @@ body {
   }
 }
 
+@media (max-width: 767px) {
+  .hero-content {
+    transform: translateY(120px);
+  }
+}
+
 /* ── Hero cinematic motion (always active) ── */
 
 .hero-motion-active .hero-bg-motion {
