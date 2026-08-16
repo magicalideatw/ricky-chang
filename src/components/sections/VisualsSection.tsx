@@ -76,20 +76,34 @@ export function VisualsSection() {
           </ScrollReveal>
 
           <ScrollReveal delay={120}>
-            <div className="flex flex-col gap-3 md:grid md:grid-cols-12 md:gap-4 lg:gap-5">
+            <div className="grid grid-cols-1 gap-3 md:min-h-[720px] md:grid-cols-12 md:grid-rows-3 md:gap-4 lg:gap-5">
               <VisualTile
                 index={0}
                 priority
                 onOpen={setLightboxIndex}
                 sizes="(max-width: 768px) 100vw, 58vw"
-                className="aspect-[4/3] md:col-span-7 md:aspect-[5/4] md:min-h-[480px] lg:min-h-[540px]"
+                className="aspect-[4/3] md:col-span-7 md:row-span-3 md:aspect-auto md:min-h-[720px]"
               />
 
               <VisualTile
                 index={1}
                 onOpen={setLightboxIndex}
                 sizes="(max-width: 768px) 100vw, 38vw"
-                className="aspect-[4/3] md:col-span-5 md:aspect-[4/5] md:min-h-[480px]"
+                className="aspect-[4/3] md:col-span-5 md:aspect-auto md:min-h-0"
+              />
+
+              <VisualTile
+                index={2}
+                onOpen={setLightboxIndex}
+                sizes="(max-width: 768px) 100vw, 38vw"
+                className="aspect-[4/3] md:col-span-5 md:aspect-auto md:min-h-0"
+              />
+
+              <VisualTile
+                index={3}
+                onOpen={setLightboxIndex}
+                sizes="(max-width: 768px) 100vw, 38vw"
+                className="aspect-[4/3] md:col-span-5 md:aspect-auto md:min-h-0"
               />
             </div>
           </ScrollReveal>
