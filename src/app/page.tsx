@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { IntroSection } from "@/components/sections/IntroSection";
 import { FeaturedPerformancesSection } from "@/components/sections/FeaturedPerformancesSection";
+import { StageMagicSection } from "@/components/sections/StageMagicSection";
 import { IdentitySection } from "@/components/sections/IdentitySection";
 import { InternationalExperienceSection } from "@/components/sections/InternationalExperienceSection";
 import { TheatreSection } from "@/components/sections/TheatreSection";
@@ -18,9 +19,10 @@ export default function Home() {
       <main>
         <HeroSection />
         <IntroSection />
-        <FeaturedPerformancesSection />
-        <IdentitySection />
         <InternationalExperienceSection />
+        <FeaturedPerformancesSection />
+        <StageMagicSection />
+        <IdentitySection />
         <TheatreSection />
         <ContactSection turnstileSiteKey={turnstileSiteKey} />
       </main>

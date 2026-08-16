@@ -122,6 +122,12 @@ body {
   object-position: 84% 30%;
 }
 
+@media (max-width: 639px) {
+  .hero-bg-image {
+    object-position: 70% center;
+  }
+}
+
 @media (min-width: 640px) {
   .hero-bg-image {
     object-position: 78% 42%;
