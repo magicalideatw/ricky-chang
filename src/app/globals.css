@@ -274,16 +274,16 @@ body {
 @keyframes hero-bg-motion-full-mobile {
   0%,
   100% {
-    transform: scale(1.02) translateX(-0.5%);
+    transform: scale(1.02) translateX(-1%);
   }
   25% {
-    transform: scale(1.03) translateX(0.25%);
+    transform: scale(1.035) translateX(0.5%);
   }
   50% {
-    transform: scale(1.04) translateX(1%);
+    transform: scale(1.05) translateX(2%);
   }
   75% {
-    transform: scale(1.03) translateX(0.25%);
+    transform: scale(1.035) translateX(0.5%);
   }
 }
 
@@ -298,9 +298,10 @@ body {
   }
 }
 
-@media (max-width: 639px) {
+@media (max-width: 768px) {
   .hero-motion-active .hero-bg-motion {
     animation-name: hero-bg-motion-full-mobile;
+    animation-duration: 13s;
   }
 }
 
