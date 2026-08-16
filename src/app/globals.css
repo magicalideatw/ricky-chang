@@ -158,6 +158,16 @@ body {
   }
 }
 
+.theatre-photo {
+  object-position: 50% 42%;
+}
+
+@media (min-width: 768px) {
+  .theatre-photo {
+    object-position: 55% 45%;
+  }
+}
+
 /* ── Hero cinematic motion (always active) ── */
 
 .hero-motion-active .hero-bg-motion {

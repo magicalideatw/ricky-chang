@@ -9,11 +9,10 @@ export function TheatreSection() {
         <ScrollReveal className="order-2 lg:order-1">
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-50">
             <Image
-              src="/images/ricky-chang-theatre.jpg"
-              alt="張煜晟 Ricky Chang 與晟心誠藝劇團"
+              src="/images/05.jpg"
+              alt="張煜晟 Ricky Chang 與晟心誠藝劇團舞台演出"
               fill
-              className="object-cover"
-              style={{ objectPosition: "55% 48%" }}
+              className="theatre-photo object-cover"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
           </div>
